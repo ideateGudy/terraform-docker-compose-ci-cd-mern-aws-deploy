@@ -109,7 +109,7 @@ Using a dedicated IAM User (e.g. named `terraform`) is an AWS security best prac
 ## 🔐 Phase 3: Configure GitHub Repository Secrets
 
 1. Push your project repository to GitHub.
-2. In GitHub, navigate to: **Settings > Secrets and variables > Actions**.
+2. In GitHub, navigate to: **Repo > Settings > Secrets and variables > Actions**.
 3. Click **New repository secret** for each of the following:
 
 | Secret Name | Example / Value |
