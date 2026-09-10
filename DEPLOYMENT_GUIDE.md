@@ -135,6 +135,10 @@ Using a dedicated IAM User (e.g. named `terraform`) is an AWS security best prac
 At your domain registrar (e.g. Namecheap, GoDaddy, Cloudflare):
 1. **A Record**: Set `@` $\rightarrow$ `server_public_ip` (Your Elastic IP).
 2. **CNAME Record**: Set `www` $\rightarrow$ `ideategudy.tech`.
+3. **Verify DNS Propagation**: Run the following command in your terminal to verify that your domain resolves to your Elastic IP via Google DNS:
+   ```bash
+   nslookup ideategudy.tech 8.8.8.8
+   ```
 
 ### 4.2 Automated HTTPS SSL Certificate (Certbot)
 The CI/CD workflow automatically handles SSL certificate issuance:
