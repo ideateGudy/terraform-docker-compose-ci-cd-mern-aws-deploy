@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.2.0
@@ -28,11 +28,12 @@ jobs:
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
           ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
           REFRESH_TOKEN_SECRET: ${{ secrets.REFRESH_TOKEN_SECRET }}
+          DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: EC2_HOST,MONGODB_URI,ACCESS_TOKEN_SECRET,REFRESH_TOKEN_SECRET
+          envs: EC2_HOST,MONGODB_URI,ACCESS_TOKEN_SECRET,REFRESH_TOKEN_SECRET,DOMAIN_NAME
           script: |
             # Create deployment workspace
             mkdir -p ~/app
@@ -53,9 +54,15 @@ jobs:
             MONGODB_URI=${MONGODB_URI}
             ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
             REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
-            CLIENT_URL=http://${EC2_HOST}
-            SERVER_URL=http://${EC2_HOST}
+            CLIENT_URL=https://${DOMAIN_NAME}
+            SERVER_URL=https://${DOMAIN_NAME}
             EOF
+
+            # Provision Let's Encrypt SSL Certificate for ${DOMAIN_NAME} if not present
+            if [ ! -f "/etc/letsencrypt/live/${DOMAIN_NAME}/fullchain.pem" ]; then
+              sudo apt-get update && sudo apt-get install -y certbot
+              sudo certbot certonly --standalone -d ${DOMAIN_NAME} -d www.${DOMAIN_NAME} --non-interactive --agree-tos -m admin@${DOMAIN_NAME} || true
+            fi
 
             # Launch multi-container Docker stack
             sudo docker compose down --remove-orphans || true

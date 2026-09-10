@@ -106,6 +106,12 @@ Configure the following **Secrets** under your GitHub Repository (**Settings > S
 | `ACCESS_TOKEN_SECRET` | Secure random string for JWT access tokens |
 | `REFRESH_TOKEN_SECRET` | Secure random string for JWT refresh tokens |
 
+Configure the following **Variable** under (**Settings > Secrets and variables > Actions > Variables**):
+
+| Variable Name | Description |
+|---|---|
+| `DOMAIN_NAME` | Custom domain name (e.g. `ideategudy.tech`) |
+
 Every push to the `main` or `master` branch will automatically trigger `.github/workflows/deploy.yml` to deploy updates to your EC2 instance.
 
 ---

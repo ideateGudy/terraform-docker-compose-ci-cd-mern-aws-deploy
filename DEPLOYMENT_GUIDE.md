@@ -121,6 +121,12 @@ Using a dedicated IAM User (e.g. named `terraform`) is an AWS security best prac
 | `ACCESS_TOKEN_SECRET` | `a_very_long_secure_random_string_here_123` |
 | `REFRESH_TOKEN_SECRET` | `another_very_long_secure_random_string_here_456` |
 
+4. Under the **Variables** tab (**Repo > Settings > Secrets and variables > Actions > Variables**), click **New repository variable**:
+
+| Variable Name | Value |
+|---|---|
+| `DOMAIN_NAME` | `ideategudy.tech` |
+
 ---
 
 ## 🚀 Phase 4: Automated CI/CD Execution
