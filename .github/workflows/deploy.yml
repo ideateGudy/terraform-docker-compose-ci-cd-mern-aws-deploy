@@ -1,0 +1,66 @@
+name: Deploy Fullstack App to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+# Prevent concurrent deployment runs
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy to EC2 Instance
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+          REFRESH_TOKEN_SECRET: ${{ secrets.REFRESH_TOKEN_SECRET }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: EC2_HOST,MONGODB_URI,ACCESS_TOKEN_SECRET,REFRESH_TOKEN_SECRET
+          script: |
+            # Create deployment workspace
+            mkdir -p ~/app
+            cd ~/app
+
+            # Git synchronization: clone or pull latest release
+            if [ -d ".git" ]; then
+              git fetch --all
+              git reset --hard origin/main || git reset --hard origin/master
+            else
+              git clone https://github.com/${{ github.repository }}.git .
+            fi
+
+            # Environment configuration
+            cat << EOF > .env
+            PORT=3000
+            NODE_ENV=production
+            MONGODB_URI=${MONGODB_URI}
+            ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
+            REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
+            CLIENT_URL=http://${EC2_HOST}
+            SERVER_URL=http://${EC2_HOST}
+            EOF
+
+            # Launch multi-container Docker stack
+            sudo docker compose down --remove-orphans || true
+            sudo docker compose up -d --build
+
+            # Prune unused images to maintain disk space
+            sudo docker image prune -f
+
