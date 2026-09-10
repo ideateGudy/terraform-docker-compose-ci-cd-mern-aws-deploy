@@ -129,31 +129,45 @@ Using a dedicated IAM User (e.g. named `terraform`) is an AWS security best prac
 
 ---
 
-## 🚀 Phase 4: Automated CI/CD Execution
+## 🌐 Phase 4: Custom Domain & HTTPS Setup (Let's Encrypt)
+
+### 4.1 DNS Configuration
+At your domain registrar (e.g. Namecheap, GoDaddy, Cloudflare):
+1. **A Record**: Set `@` $\rightarrow$ `server_public_ip` (Your Elastic IP).
+2. **CNAME Record**: Set `www` $\rightarrow$ `ideategudy.tech`.
+
+### 4.2 Automated HTTPS SSL Certificate (Certbot)
+The CI/CD workflow automatically handles SSL certificate issuance:
+- **Nginx HTTP (Port 80)**: Validates ACME challenges (`/.well-known/acme-challenge/`) and redirects all HTTP traffic to HTTPS (`301 https://$host$request_uri`).
+- **Nginx HTTPS (Port 443)**: Serves static React assets and proxies `/api/` and `/healthz` securely over SSL using Let's Encrypt certificates (`/etc/letsencrypt/live/${DOMAIN_NAME}/`).
+
+---
+
+## 🚀 Phase 5: Automated CI/CD Execution
 
 1. Commit and push your code to your repository:
    ```bash
    git add .
-   git commit -m "Configure AWS EC2 Docker deployment"
+   git commit -m "Configure AWS EC2 Docker deployment with HTTPS"
    git push origin main
    ```
 
 2. Monitor deployment in GitHub:
    - Navigate to the **Actions** tab in your GitHub repository.
    - Click on the running **Deploy Fullstack App to AWS EC2** workflow.
-   - The workflow will automatically connect to your EC2 instance via SSH, pull latest changes, write the `.env` file, and start all containers.
+   - The workflow will automatically connect to your EC2 instance via SSH, pull latest changes, write `.env`, issue/renew Let's Encrypt SSL certificates, and start all containers.
 
 ---
 
-## 🧪 Phase 5: Verification & Inspection
+## 🧪 Phase 6: Verification & Inspection
 
-### 5.1 Access Web Application
+### 6.1 Access Web Application
 Open your browser and navigate to:
-- **Frontend SPA**: `http://<EC2_PUBLIC_IP>` (e.g. `http://54.210.12.34`)
-- **Backend Health Check**: `http://<EC2_PUBLIC_IP>/healthz` (returns `{"status":"ok"}`)
-- **Backend API**: `http://<EC2_PUBLIC_IP>/api/auth/`
+- **Frontend SPA (HTTPS)**: `https://ideategudy.tech`
+- **Backend Health Check**: `https://ideategudy.tech/healthz` (returns `{"status":"ok"}`)
+- **Backend API**: `https://ideategudy.tech/api/auth/`
 
-### 5.2 Direct SSH Server Inspection (Optional)
+### 6.2 Direct SSH Server Inspection (Optional)
 Connect directly to the EC2 server:
 ```bash
 ssh -i ~/.ssh/diary-app-key.pem ubuntu@<EC2_PUBLIC_IP>
@@ -172,6 +186,16 @@ sudo docker compose logs -f
 # Restart services manually if needed
 sudo docker compose restart
 ```
+
+---
+
+## ❓ Troubleshooting
+
+### SSH `dial tcp ***:22: i/o timeout` Error in GitHub Actions
+If GitHub Actions fails at the SSH step with `i/o timeout`:
+1. **Verify `EC2_HOST` Secret**: Check that the `EC2_HOST` secret in **GitHub Settings > Secrets and variables > Actions** matches your current EC2 Elastic IP.
+2. **Verify Security Group**: Ensure `allowed_ssh_cidr = "0.0.0.0/0"` in `terraform.tfvars` so GitHub Actions runners can reach port 22.
+3. **Verify EC2 Instance State**: Confirm the EC2 instance is in `Running` state in the AWS Console.
 
 ---
 
