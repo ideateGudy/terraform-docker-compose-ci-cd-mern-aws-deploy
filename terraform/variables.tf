@@ -33,3 +33,10 @@ variable "ami_id" {
   type        = string
   default     = "ami-0aba19e56f3eaec05"
 }
+
+variable "domain_name" {
+  description = "Custom domain name for application (e.g. ideategudy.tech)"
+  type        = string
+  default     = "ideategudy.tech"
+}
+
