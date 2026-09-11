@@ -316,6 +316,15 @@ Infrastructure-as-Code and containerization give you complete confidence that yo
 
 ---
 
+## 🔗 Related Documentation & Alternative Architecture
+
+Looking for an enterprise-grade, multi-environment AWS deployment pattern? Check out the companion article:
+
+👉 **[How I Built and Deployed a Full-Stack MERN Application on AWS using Modular Terraform and Keyless GitHub Actions OIDC](https://dev.to/ideategudy/how-i-built-and-deployed-a-full-stack-mern-application-on-aws-using-modular-terraform-and-keyless-3fba)**
+> *This guide covers an advanced deployment architecture featuring S3 static site hosting, CloudFront CDN, Application Load Balancers (ALB), EC2 Auto Scaling Groups (ASG), Amazon ECR, and keyless deployments with GitHub Actions OIDC.*
+
+---
+
 ## 🤝 Connect & Follow Me
 
 If you found this guide helpful, hit the ❤️ button, bookmark it for later, and feel free to connect with me!
