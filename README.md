@@ -76,17 +76,19 @@ Here is the clean layout of our project repository:
 .
 ├── client/                     # React Frontend Application (Vite + Nginx Dockerfile)
 │   ├── Dockerfile              # Multi-stage build (Node build -> Nginx runtime)
-│   └── nginx.conf              # Nginx web server & reverse proxy configuration
+│   ├── nginx.conf              # Production Nginx reverse proxy configuration (SSL HTTPS)
+│   └── nginx.local.conf        # Local development Nginx configuration (HTTP localhost)
 ├── server/                     # Node.js Express Backend API
 │   └── Dockerfile              # Lightweight Node 22 Alpine container build
 ├── terraform/                  # Terraform IaC Infrastructure Code
 │   ├── main.tf                 # Root Terraform entry point
 │   ├── variables.tf            # Variable definitions
-│   ├── outputs.tf              # Server Public IP & SSH output definitions
+│   ├── outputs.tf              # Server Public IP, Domain & SSH output definitions
 │   └── modules/ec2/            # EC2 module (Instance, Security Group, EIP, UserData)
 ├── .github/workflows/
 │   └── deploy.yml              # GitHub Actions automated SSH deployment pipeline
-├── docker-compose.yml          # Multi-container orchestration config
+├── docker-compose.yml          # Multi-container production orchestration config
+├── docker-compose.override.yml.example # Local HTTP development override template
 └── .env.example                # Sample environment variables reference
 ```
 
@@ -106,17 +108,25 @@ cd deploy-list
 # 2. Copy sample environment file
 cp .env.example .env
 
-# 3. Build and launch containers locally
+# 3. Enable local HTTP development config (bypasses SSL cert check on localhost)
+cp docker-compose.override.yml.example docker-compose.override.yml
+
+# 4. Build and launch containers locally
 docker compose up -d --build
 ```
 
-You can test your application at:
+> 💡 **How Local vs Production Works**: Creating `docker-compose.override.yml` tells Docker to use `nginx.local.conf` so your app runs on `http://localhost` without expecting SSL certificates. Since `docker-compose.override.yml` is in `.gitignore`, it will **not** be pushed to EC2. On EC2, Docker Compose automatically falls back to `nginx.conf` with full Let's Encrypt HTTPS support!
+
+You can test your application locally at:
 - **Frontend SPA**: `http://localhost`
 - **Backend API**: `http://localhost/api/auth/`
 - **Health Check**: `http://localhost/healthz`
 
-<!-- Image Placeholder: Local Docker Compose application running in browser -->
-![Local Docker Application Screenshot](https://raw.githubusercontent.com/ideateGudy/deploy-list/main/docs/images/local-app-running.png)
+![Local Docker Containers Screenshot](./img/local-docker-app.png)
+> *Figure 1: Docker Desktop showing all three containers (`diary-mongo`, `diary-server`, and `diary-client`) running green and healthy.*
+
+![Live Local Frontend Application Screenshot](./img/local-app-browser.png)
+> *Figure 2: The full-stack application running live in browser on `http://localhost`.*
 
 ---
 
@@ -154,7 +164,7 @@ terraform apply -auto-approve
 ```
 
 <!-- Image Placeholder: Terminal output showing successful terraform apply execution and Elastic IP output -->
-![Terraform Apply Terminal Output](https://raw.githubusercontent.com/ideateGudy/deploy-list/main/docs/images/terraform-apply-output.png)
+![Terraform Apply Terminal Output](./img/terraform-apply.png)
 
 Once complete, Terraform will output your `server_public_ip` (Elastic IP) and `domain_name`. Keep these outputs handy!
 
@@ -173,7 +183,7 @@ To make your application accessible at a real domain (e.g., `ideategudy.tech`) a
    ```
 
 <!-- Image Placeholder: DNS Settings management page showing A Record and CNAME Record -->
-![DNS Records Configuration Screenshot](https://raw.githubusercontent.com/ideateGudy/deploy-list/main/docs/images/dns-configuration.png)
+![DNS Records Configuration Screenshot](./img/dns-configuration.png)
 
 ---
 
@@ -202,7 +212,7 @@ Add the following **Repository Variable**:
 | `DOMAIN_NAME` | `ideategudy.tech` (or your domain name) |
 
 <!-- Image Placeholder: GitHub Repository Settings showing configured Actions secrets and variables -->
-![GitHub Actions Secrets & Variables Settings](https://raw.githubusercontent.com/ideateGudy/deploy-list/main/docs/images/github-secrets-settings.png)
+![GitHub Actions Secrets & Variables Settings](./img/github-secrets-settings.png)
 
 ---
 
@@ -230,7 +240,7 @@ git push origin main
 Head over to the **Actions** tab in GitHub to watch your deployment complete in real-time! ⚡
 
 <!-- Image Placeholder: Successful GitHub Actions workflow execution graph -->
-![GitHub Actions Pipeline Successful Run](https://raw.githubusercontent.com/ideateGudy/deploy-list/main/docs/images/github-actions-deployment.png)
+![GitHub Actions Pipeline Successful Run](./img/github-actions-deployment.png)
 
 ---
 
@@ -240,7 +250,7 @@ Once the GitHub Actions workflow completes successfully, open your browser and n
 - **Deployed App (HTTPS)**: `https://ideategudy.tech`
 
 <!-- Image Placeholder: Production site live in browser with secure SSL padlock icon -->
-![Live Application with SSL Certificate Padlock](https://raw.githubusercontent.com/ideateGudy/deploy-list/main/docs/images/live-app-https.png)
+![Live Application with SSL Certificate Padlock](./img/live-app-https.png)
 
 ---
 
