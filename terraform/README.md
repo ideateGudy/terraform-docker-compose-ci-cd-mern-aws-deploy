@@ -67,6 +67,7 @@ terraform apply
 
 Upon completion, Terraform will output:
 - `server_public_ip`: Public Elastic IP address of your EC2 instance.
+- `domain_name`: Configured application domain name.
 - `ssh_command`: SSH command to connect to the instance.
 
 ---

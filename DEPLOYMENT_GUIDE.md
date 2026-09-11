@@ -84,6 +84,7 @@ Using a dedicated IAM User (e.g. named `terraform`) is an AWS security best prac
    key_name         = "ann_notch"            # Matching AWS Key Pair name created in Phase 1
    allowed_ssh_cidr = "0.0.0.0/0"
    ami_id           = "ami-0aba19e56f3eaec05" # Ubuntu Server 26.04 LTS (amd64)
+   domain_name      = "ideategudy.tech"
    ```
 
 4. Initialize Terraform modules & providers:
@@ -102,7 +103,9 @@ Using a dedicated IAM User (e.g. named `terraform`) is an AWS security best prac
    ```
 
 7. **Save the Terraform Outputs**:
-   Upon completion, note down the `server_public_ip` printed in your terminal (e.g. `54.210.12.34`).
+   Upon completion, note down the outputs printed in your terminal:
+   - `server_public_ip`: Elastic IP address (e.g. `54.210.12.34`).
+   - `domain_name`: Configured application domain name (e.g. `ideategudy.tech`).
 
 ---
 
